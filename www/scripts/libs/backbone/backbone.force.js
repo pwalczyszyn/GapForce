@@ -23,6 +23,9 @@
             var client = Backbone.Force.client;
 
             _.extend(options, {
+                async:client.asyncAjax,
+                contentType:'application/json',
+                dataType:'json',
                 cache:false,
                 processData:false,
                 beforeSend:function (xhr) {
@@ -49,8 +52,8 @@
         fetch:function (options) {
 
             var client = Backbone.Force.client,
-                fetchUrl = client.instanceUrl + '/services/data/' + client.apiVersion + '/sobjects/'
-                    + this.type + '/' + this.id + (this.fields ? '?fields=' + this.fields.join(',') : '');
+                fetchUrl = [client.instanceUrl , '/services/data/', client.apiVersion, '/sobjects/', this.type, '/',
+                            this.id, (this.fields ? '?fields=' + this.fields.join(',') : '')].join('');
 
             _.extend(options, {url:fetchUrl});
 
