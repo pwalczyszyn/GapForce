@@ -26,7 +26,7 @@ define(['jquery', 'underscore', 'Backbone.Force'], function ($, _, BackboneForce
                 success:function (oppVal) {
                     console.log('fetch success');
 
-                    oppVal.set('Amount', 235001);
+                    oppVal.set('Amount', 235001, {silent:true});
 
                     oppVal.save(null, {
                         success:function (result) {

@@ -23,11 +23,11 @@
             var client = Backbone.Force.client;
 
             _.extend(options, {
+                cache:false,
+                dataType:'json',
+                processData:false,
                 async:client.asyncAjax,
                 contentType:'application/json',
-                dataType:'json',
-                cache:false,
-                processData:false,
                 beforeSend:function (xhr) {
                     if (client.proxyUrl !== null) {
                         xhr.setRequestHeader('SalesforceProxy-Endpoint', options.url);
@@ -38,7 +38,7 @@
             });
 
             if (method === 'update')
-                options.data = JSON.stringify(model.changedAttributes());
+                options.data = JSON.stringify(model.changes);
 
             console.log(options.data, model.hasChanged());
 
