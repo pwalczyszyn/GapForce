@@ -37,7 +37,18 @@
                 }
             });
 
+            if (method === 'update')
+                options.data = JSON.stringify(model.changedAttributes());
+
+            console.log(options.data, model.hasChanged());
+
             Backbone.sync(method, model, options)
+        },
+
+        _getServiceURL:function () {
+            return this.client.instanceUrl
+                + '/services/data/'
+                + this.client.apiVersion;
         }
     };
 
@@ -51,16 +62,43 @@
 
         fetch:function (options) {
 
-            var client = Backbone.Force.client,
-                fetchUrl = [client.instanceUrl , '/services/data/', client.apiVersion, '/sobjects/', this.type, '/',
-                            this.id, (this.fields ? '?fields=' + this.fields.join(',') : '')].join('');
-
-            _.extend(options, {url:fetchUrl});
+            var fields = this.fields ? '?fields=' + this.fields.join(',') : '';
+            _.extend(options, {
+                url:(Backbone.Force._getServiceURL() + '/sobjects/' + this.type + '/' + this.id + fields)
+            });
 
             return Backbone.Model.prototype.fetch.call(this, options);
+        },
+
+        save:function (key, value, options) {
+
+            var attrs;
+
+            // Handle both `("key", value)` and `({key: value})` -style calls.
+            if (_.isObject(key) || key == null) {
+                attrs = key;
+                options = value;
+            } else {
+                attrs = {};
+                attrs[key] = value;
+            }
+
+            _.extend(options, {
+                type:'PATCH',
+                url:(Backbone.Force._getServiceURL() + '/sobjects/' + this.type + '/' + this.id)
+            });
+            return Backbone.Model.prototype.save.call(this, attrs, options);
         }
 
     });
+
+
+//    var methodMap = {
+//        'create': 'POST',
+//        'update': 'PUT',
+//        'delete': 'DELETE',
+//        'read':   'GET'
+//    };
 
 //    Backbone.sync = function (method, model, options) {
 //        var type = methodMap[method];

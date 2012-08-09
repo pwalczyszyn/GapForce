@@ -25,6 +25,18 @@ define(['jquery', 'underscore', 'Backbone.Force'], function ($, _, BackboneForce
             opp.fetch({
                 success:function (oppVal) {
                     console.log('fetch success');
+
+                    oppVal.set('Amount', 235001);
+
+                    oppVal.save(null, {
+                        success:function (result) {
+                            console.log('save success');
+                        },
+                        error:function (error) {
+                            console.log('save error');
+                        }
+                    });
+
                 },
                 error:function () {
                     console.log('fetch error');
