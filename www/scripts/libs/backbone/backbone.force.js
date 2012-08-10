@@ -12,6 +12,13 @@
     var _ = this._,
         Backbone = this.Backbone;
 
+    var methodMap = {
+        'create':'POST',
+        'update':'PATCH',
+        'delete':'DELETE',
+        'read':'GET'
+    };
+
     Backbone.Force = {
 
         initialize:function (forctkClient) {
@@ -19,13 +26,16 @@
         },
 
         sync:function (method, model, options) {
+            // Setting options if were not set
+            options || (options = {});
 
             var client = Backbone.Force.client;
-
+            // Extending options with Salesforce specific settings
             _.extend(options, {
                 cache:false,
                 dataType:'json',
                 processData:false,
+                type:methodMap[method],
                 async:client.asyncAjax,
                 contentType:'application/json',
                 beforeSend:function (xhr) {
@@ -35,133 +45,6 @@
                     xhr.setRequestHeader(client.authzHeader, "OAuth " + client.sessionId);
                     xhr.setRequestHeader('X-User-Agent', 'salesforce-toolkit-rest-javascript/' + client.apiVersion);
                 }
-            });
-
-            if (method === 'update')
-                options.data = JSON.stringify(model.changes);
-
-            console.log(options.data, model.hasChanged());
-
-            Backbone.sync(method, model, options)
-        },
-
-        _getServiceURL:function () {
-            return this.client.instanceUrl
-                + '/services/data/'
-                + this.client.apiVersion;
-        }
-    };
-
-    Backbone.Force.Model = Backbone.Model.extend({
-
-        type:null,
-
-        fields:null,
-
-        sync:Backbone.Force.sync,
-
-        fetch:function (options) {
-
-            var fields = this.fields ? '?fields=' + this.fields.join(',') : '';
-            _.extend(options, {
-                url:(Backbone.Force._getServiceURL() + '/sobjects/' + this.type + '/' + this.id + fields)
-            });
-
-            return Backbone.Model.prototype.fetch.call(this, options);
-        },
-
-        save:function (key, value, options) {
-
-            var attrs;
-
-            // Handle both `("key", value)` and `({key: value})` -style calls.
-            if (_.isObject(key) || key == null) {
-                attrs = key;
-                options = value;
-            } else {
-                attrs = {};
-                attrs[key] = value;
-            }
-
-            _.extend(options, {
-                type:'PATCH',
-                url:(Backbone.Force._getServiceURL() + '/sobjects/' + this.type + '/' + this.id)
-            });
-            return Backbone.Model.prototype.save.call(this, attrs, options);
-        }
-
-    });
-
-
-//    var methodMap = {
-//        'create': 'POST',
-//        'update': 'PUT',
-//        'delete': 'DELETE',
-//        'read':   'GET'
-//    };
-
-//    Backbone.sync = function (method, model, options) {
-//        var type = methodMap[method];
-//
-//        // Default options, unless specified.
-//        options || (options = {});
-//
-//        // Default JSON-request options.
-//        var params = {type:type, dataType:'json'};
-//
-//        // Ensure that we have a URL.
-//        if (!options.url) {
-//            params.url = getValue(model, 'url') || urlError();
-//        }
-//
-//        // Ensure that we have the appropriate request data.
-//        if (!options.data && model && (method == 'create' || method == 'update')) {
-//            params.contentType = 'application/json';
-//            params.data = JSON.stringify(model.toJSON());
-//        }
-//
-//        // For older servers, emulate JSON by encoding the request into an HTML-form.
-//        if (Backbone.emulateJSON) {
-//            params.contentType = 'application/x-www-form-urlencoded';
-//            params.data = params.data ? {model:params.data} : {};
-//        }
-//
-//        // For older servers, emulate HTTP by mimicking the HTTP method with `_method`
-//        // And an `X-HTTP-Method-Override` header.
-//        if (Backbone.emulateHTTP) {
-//            if (type === 'PUT' || type === 'DELETE') {
-//                if (Backbone.emulateJSON) params.data._method = type;
-//                params.type = 'POST';
-//                params.beforeSend = function (xhr) {
-//                    xhr.setRequestHeader('X-HTTP-Method-Override', type);
-//                };
-//            }
-//        }
-//
-//        // Don't process data on a non-GET request.
-//        if (params.type !== 'GET' && !Backbone.emulateJSON) {
-//            params.processData = false;
-//        }
-//
-//        // Make the request, allowing the user to override any Ajax options.
-//        return $.ajax(_.extend(params, options));
-//    };
-
-})();
-
-//
-//var that = this;
-//var url = this.instanceUrl + '/services/data' + path;
-//
-//$j.ajax({
-//    type: method || "GET",
-//    async: this.asyncAjax,
-//    url: (this.proxyUrl !== null) ? this.proxyUrl: url,
-//    contentType: 'application/json',
-//    cache: false,
-//    processData: false,
-//    data: payload,
-//    success: callback,
 //    error: (!this.refreshToken || retry ) ? error : function(jqXHR, textStatus, errorThrown) {
 //        if (jqXHR.status === 401) {
 //            that.refreshAccessToken(function(oauthResponse) {
@@ -174,12 +57,141 @@
 //            error(jqXHR, textStatus, errorThrown);
 //        }
 //    },
-//    dataType: "json",
-//    beforeSend: function(xhr) {
-//        if (that.proxyUrl !== null) {
-//            xhr.setRequestHeader('SalesforceProxy-Endpoint', url);
-//        }
-//        xhr.setRequestHeader(that.authzHeader, "OAuth " + that.sessionId);
-//        xhr.setRequestHeader('X-User-Agent', 'salesforce-toolkit-rest-javascript/' + that.apiVersion);
-//    }
-//});
+            });
+
+            // In case of update it has to follow custom logic because Salesforce uses PATCH method and accepts only
+            // changed attributes
+            if (method === 'update') {
+
+                // Getting updates
+                var changes = _.clone(model.changesToUpdate) || [],
+                    updates = _.pick(model.toJSON(), changes);
+
+                // Making sure that Is attribute is not part of update
+                delete updates.Id;
+
+                // Handling error
+                var error = options.error;
+                options.error = function () {
+
+                    // In case of error reverting back changes to update
+                    model.changesToUpdate = _.union(model.changesToUpdate, changes);
+
+                    // Calling original error function
+                    if (error) error.apply(this, Array.prototype.slice.call(arguments));
+
+                };
+
+                // Clearing current changes
+                model.changesToUpdate.length = 0;
+
+                // Setting options data property with updates
+                options.data = JSON.stringify(updates);
+            }
+
+            // Calling original sync function
+            Backbone.sync(method, model, options)
+        },
+
+        _getServiceURL:function () {
+            return this.client.instanceUrl
+                + '/services/data/'
+                + this.client.apiVersion;
+        }
+    };
+
+    Backbone.Force.Model = Backbone.Model.extend({
+
+        // Salesforce Id attribute
+        idAttribute:'Id',
+
+        // Type of Salesforce object e.g. Opportunity, Account...
+        type:null,
+
+        // Fields to be loaded from Salesforce in fetch function
+        fields:null,
+
+        // Array of fields to be updated with next save funciton call
+        changesToUpdate:null,
+
+        // Setting Salesforce specific sync implementation
+        sync:Backbone.Force.sync,
+
+        constructor:function (attributes, options) {
+
+            // Setting options if it wasn't passed to the function
+//            options || (options = {});
+//            options.addToUpdates = false;
+
+            this._noneUpdateableChange = true;
+
+            // Calling Backbone's constructor function
+            Backbone.Model.prototype.constructor.call(this, attributes, options);
+        },
+
+        fetch:function (options) {
+            // Setting options if it wasn't passed to the function
+            options || (options = {});
+
+            // Setting flag that indicates that this is fetch change
+            options.addToUpdates = false;
+
+            // Getting fields to fetch
+            var fields = this.fields ? '?fields=' + this.fields.join(',') : '';
+
+            // Setting options url property
+            _.extend(options, {
+                url:(Backbone.Force._getServiceURL() + '/sobjects/' + this.type + '/' + this.id + fields)
+            });
+
+            // Calling Backbone's fetch function
+            return Backbone.Model.prototype.fetch.call(this, options);
+        },
+
+        save:function (key, value, options) {
+            // Getting options property
+            if (_.isObject(key) || key == null) options = value;
+
+            // Setting options if it wasn't passed to the function
+            options || (options = {});
+
+            // Setting flag that indicates that this is create change
+            // So when the service returns back it will not set anything to update
+            if (this.isNew()) options.addToUpdates = false;
+
+            // Setting url option
+            _.extend(options, {
+                url:(Backbone.Force._getServiceURL() + '/sobjects/' + this.type + '/' + (!this.isNew() ? this.id : ''))
+            });
+
+            // Calling Backbone's save function
+            return Backbone.Model.prototype.save.call(this, key, value, options);
+        },
+
+        set:function (key, value, options) {
+            var attrs;
+
+            // Handle both `"key", value` and `{key: value}` -style arguments.
+            if (_.isObject(key) || key == null) {
+                attrs = key;
+                options = value;
+            } else {
+                attrs = {};
+                attrs[key] = value;
+            }
+
+            // If attrs are set and this is not a fetch update
+            if (attrs && (!options || options.addToUpdates !== false)) {
+                // Setting changesToUpdate if were not set previously
+                this.changesToUpdate || (this.changesToUpdate = []);
+                // Adding current updates to this.changesToUpdate
+                this.changesToUpdate = _.union(this.changesToUpdate, Object.keys(attrs));
+            }
+
+            // Calling Backbone's set function
+            return Backbone.Model.prototype.set.call(this, key, value, options);
+        }
+
+    });
+
+})();

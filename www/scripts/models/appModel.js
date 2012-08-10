@@ -21,40 +21,42 @@ define(['jquery', 'underscore', 'Backbone.Force'], function ($, _, BackboneForce
 
             var Opportunity = BackboneForce.Model.extend({type:'Opportunity'});
 
-            var opp = new Opportunity({id:'006E0000004sgp0'});
-            opp.fetch({
-                success:function (oppVal) {
-                    console.log('fetch success');
-
-                    oppVal.set('Amount', 235001, {silent:true});
-
-                    oppVal.save(null, {
-                        success:function (result) {
-                            console.log('save success');
-                        },
-                        error:function (error) {
-                            console.log('save error');
-                        }
-                    });
-
+            var newOpp = new Opportunity({
+                Name:'My new opp',
+                StageName:'Prospecting',
+                CloseDate:new Date()
+            });
+            newOpp.save(null, {
+                success:function (result) {
+                    console.log('create success');
                 },
-                error:function () {
+                error:function (result) {
                     console.log('fetch error');
                 }
             });
 
-//            var headers = {};
-//            headers[this.client.authzHeader] = "OAuth " + this.client.sessionId;
-//            headers['X-User-Agent'] = 'salesforce-toolkit-rest-javascript/' + this.client.apiVersion;
-//            $.ajaxSetup({headers:headers});
-
-
-//            this.client.query("SELECT Name FROM Account LIMIT 1",
-//                function (response) {
-//                    $('#message').html('The first account I see is '
-//                        + response.records[0].Name);
+//            var opp = new Opportunity({Id:'006E0000004sgp0'});
+//            opp.fetch({
+//                success:function (oppVal) {
+//                    console.log('fetch success');
+//
+//                    oppVal.set('Amount', oppVal.get('Amount') + 1);
+//
+//                    oppVal.save(null, {
+//                        success:function (result) {
+//                            console.log('save success');
+//                        },
+//                        error:function (error) {
+//                            console.log('save error');
+//                        }
+//                    });
+//
+//                },
+//                error:function () {
+//                    console.log('fetch error');
 //                }
-//            );
+//            });
+//
 
         }
 
