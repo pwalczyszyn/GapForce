@@ -885,6 +885,7 @@ define("cordova/exec", function(require, exports, module) {
 var cordova = require('cordova'),
     utils = require('cordova/utils'),
     gapBridge,
+    gapInterval = null,
     createGapBridge = function() {
 
         gapBridge = document.createElement("iframe");
@@ -893,6 +894,17 @@ var cordova = require('cordova'),
         gapBridge.setAttribute("width","0px");
         gapBridge.setAttribute("frameborder","0");
         document.documentElement.appendChild(gapBridge);
+
+        // HACK from here: https://issues.apache.org/jira/browse/CB-593
+        if (gapInterval === null) {
+            gapInterval = window.setInterval(function () {
+                if (cordova.commandQueue.length === 0 && cordova.commandQueueFlushing === false) {
+                    if (gapBridge) { gapBridge.parentNode.removeChild(gapBridge); gapBridge = null; }
+                    clearInterval(gapInterval);
+                    gapInterval = null;
+                }
+            }, 500);
+        }
     },
     channel = require('cordova/channel');
 
