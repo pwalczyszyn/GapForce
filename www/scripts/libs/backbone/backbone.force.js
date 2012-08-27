@@ -67,7 +67,7 @@
                 var changes = _.clone(model.changesToUpdate) || [],
                     updates = _.pick(model.toJSON(), changes);
 
-                // Making sure that Is attribute is not part of update
+                // Making sure that Id attribute is not part of an update
                 delete updates.Id;
 
                 // Handling error
