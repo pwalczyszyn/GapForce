@@ -6,7 +6,7 @@
  * Time: 2:10 PM
  */
 
-define(['jquery', 'underscore', 'Backbone.Force'], function ($, _, BackboneForce) {
+define(['jquery', 'underscore', 'Backbone.Force'], function ($, _, Force) {
 
     var appModel = {
 
@@ -17,46 +17,59 @@ define(['jquery', 'underscore', 'Backbone.Force'], function ($, _, BackboneForce
 
             this.client = forcetkClient;
 
-            BackboneForce.initialize(forcetkClient);
+            Force.initialize(forcetkClient);
 
-            var Opportunity = BackboneForce.Model.extend({type:'Opportunity'});
+            var OppsCollection = Force.Collection.extend({
+                    query:'SELECT Id, Name FROM Account'
+                }),
+                oppsCollection = new OppsCollection({});
 
-            var newOpp = new Opportunity({
-                Name:'My new opp',
-                StageName:'Prospecting',
-                CloseDate:new Date()
-            });
-            newOpp.save(null, {
+            oppsCollection.fetch({
                 success:function (result) {
-                    console.log('create success');
+                    console.log('coll success');
                 },
                 error:function (result) {
+                    console.log('coll error');
+                }
+            });
+
+            var Opportunity = Force.Model.extend({type:'Opportunity'}),
+                newOpp = new Opportunity({
+                    Name:'My new opp',
+                    StageName:'Prospecting',
+                    CloseDate:new Date()
+                });
+//            newOpp.save(null, {
+//                success:function (result) {
+//                    console.log('create success');
+//                },
+//                error:function (result) {
+//                    console.log('fetch error');
+//                }
+//            });
+
+            var opp = new Opportunity({Id:'006E0000004sgp0'});
+            opp.fetch({
+                success:function (oppVal) {
+                    console.log('fetch success');
+
+                    oppVal.set('Amount', oppVal.get('Amount') + 1);
+
+                    oppVal.save(null, {
+                        success:function (result) {
+                            console.log('save success');
+                        },
+                        error:function (error) {
+                            console.log('save error');
+                        }
+                    });
+
+                },
+                error:function () {
                     console.log('fetch error');
                 }
             });
 
-//            var opp = new Opportunity({Id:'006E0000004sgp0'});
-//            opp.fetch({
-//                success:function (oppVal) {
-//                    console.log('fetch success');
-//
-//                    oppVal.set('Amount', oppVal.get('Amount') + 1);
-//
-//                    oppVal.save(null, {
-//                        success:function (result) {
-//                            console.log('save success');
-//                        },
-//                        error:function (error) {
-//                            console.log('save error');
-//                        }
-//                    });
-//
-//                },
-//                error:function () {
-//                    console.log('fetch error');
-//                }
-//            });
-//
 
         }
 

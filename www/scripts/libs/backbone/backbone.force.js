@@ -19,7 +19,7 @@
         'read':'GET'
     };
 
-    Backbone.Force = {
+    var Force = Backbone.Force = {
 
         initialize:function (forctkClient) {
             this.client = forctkClient;
@@ -29,7 +29,7 @@
             // Setting options if were not set
             options || (options = {});
 
-            var client = Backbone.Force.client;
+            var client = Force.client;
             // Extending options with Salesforce specific settings
             _.extend(options, {
                 cache:false,
@@ -100,7 +100,7 @@
         }
     };
 
-    Backbone.Force.Model = Backbone.Model.extend({
+    var Model = Force.Model = Backbone.Model.extend({
 
         // Salesforce Id attribute
         idAttribute:'Id',
@@ -115,19 +115,7 @@
         changesToUpdate:null,
 
         // Setting Salesforce specific sync implementation
-        sync:Backbone.Force.sync,
-
-        constructor:function (attributes, options) {
-
-            // Setting options if it wasn't passed to the function
-//            options || (options = {});
-//            options.addToUpdates = false;
-
-            this._noneUpdateableChange = true;
-
-            // Calling Backbone's constructor function
-            Backbone.Model.prototype.constructor.call(this, attributes, options);
-        },
+        sync:Force.sync,
 
         fetch:function (options) {
             // Setting options if it wasn't passed to the function
@@ -141,7 +129,7 @@
 
             // Setting options url property
             _.extend(options, {
-                url:(Backbone.Force._getServiceURL() + '/sobjects/' + this.type + '/' + this.id + fields)
+                url:(Force._getServiceURL() + '/sobjects/' + this.type + '/' + this.id + fields)
             });
 
             // Calling Backbone's fetch function
@@ -155,13 +143,9 @@
             // Setting options if it wasn't passed to the function
             options || (options = {});
 
-            // Setting flag that indicates that this is create change
-            // So when the service returns back it will not set anything to update
-            if (this.isNew()) options.addToUpdates = false;
-
             // Setting url option
             _.extend(options, {
-                url:(Backbone.Force._getServiceURL() + '/sobjects/' + this.type + '/' + (!this.isNew() ? this.id : ''))
+                url:(Force._getServiceURL() + '/sobjects/' + this.type + '/' + (!this.isNew() ? this.id : ''))
             });
 
             // Calling Backbone's save function
@@ -181,7 +165,7 @@
             }
 
             // If attrs are set and this is not a fetch update
-            if (attrs && (!options || options.addToUpdates !== false)) {
+            if (attrs && !this.isNew() && (!options || options.addToUpdates !== false)) {
                 // Setting changesToUpdate if were not set previously
                 this.changesToUpdate || (this.changesToUpdate = []);
                 // Adding current updates to this.changesToUpdate
@@ -190,8 +174,90 @@
 
             // Calling Backbone's set function
             return Backbone.Model.prototype.set.call(this, key, value, options);
+        },
+
+        parse:function (resp, xhr) {
+            var result = resp;
+
+            if (resp != null && resp.hasOwnProperty('attributes')) {
+                // Checking if type is set, if not using the one from resp
+                if (this.type == null) this.type = resp.attributes.type;
+                // Cloning resp
+                result = _.clone(resp);
+                // deleting attributes property
+                delete result.attributes;
+            }
+
+            return result;
         }
 
+    });
+
+    var Collection = Force.Collection = Backbone.Collection.extend({
+
+        // Query string, either full query with SELECT part or only WHERE part
+        query:null,
+
+        // Model type that should extend Force.Model
+        model:Model,
+
+        // Setting Salesforce specific sync implementation
+        sync:Force.sync,
+
+        fetch:function (options) {
+
+            // Throwing an error if query is null
+            if (this.query == null) throw new Error('Force.Collection.query property is required!');
+
+            var query = this.query;
+
+            // Checking if this is just a WHERE query
+            if (this.query.toLowerCase().indexOf('where') == 0) {
+                var model = new this.model();
+
+                if (model.fields == null)
+                    throw new Error('With WHERE queries Model.fields property needs to be set!');
+                if (model.type == null)
+                    throw new Error('With WHERE queries Model.type property needs to be set!');
+
+                query = 'SELECT ' + model.fields.join(',') + ' FROM ' + model.type + ' ' + this.query;
+            }
+
+            // Setting options if it wasn't passed to the function
+            options = options ? _.clone(options) : {};
+
+            // Setting options url property
+            options.url = Force._getServiceURL() + '/query/?q=' + encodeURIComponent(query);
+
+            if (options.parse === undefined) options.parse = true;
+            var collection = this,
+                success = options.success,
+                records = [];
+            options.success = function (resp, status, xhr) {
+
+                // Adding result to the records array
+                records.push.apply(records, resp.records);
+
+                // Checking if the result is not paged
+                if (resp.nextRecordsUrl !== undefined) {
+
+                    var _options = _.clone(options);
+
+                    // Setting url to next records batch
+                    _options.url = Force._getServiceURL() + resp.nextRecordsUrl;
+
+                    // Making another request for next records batch
+                    collection.sync.call(collection, 'read', collection, _options);
+
+                } else {
+                    collection[options.add ? 'add' : 'reset'](collection.parse(records, xhr), options);
+                    if (success) success(collection, resp);
+                }
+
+            };
+            options.error = Backbone.wrapError(options.error, collection, options);
+            return this.sync.call(this, 'read', this, options);
+        }
     });
 
 })();
