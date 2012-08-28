@@ -25,7 +25,7 @@ div.ui-header.absolute {
 
 div.ui-content.absolute {
     position: absolute;
-    top: 43px;
+    top: 40px;
     bottom: 0;
     left: 0;
     right: 0;
@@ -47,31 +47,40 @@ div.ui-footer.absolute {
     -webkit-overflow-scrolling: touch;
 }
 
-#btnAddPhoto {
+div.opportunity-list-item {
     position: relative;
-    width: 80px;
-    height: 80px;
-    background-color: #d3d3d3;
-    color: #ffffff;
-    font-size: 12px;
-    text-shadow: none;
-    line-height: 80px;
-    text-align: center;
+    height: 85px;
 }
 
-#btnAddPhoto img {
+div.opportunity-chart {
     position: absolute;
-    left: 0;
-    top: 0;
-    width: 80px;
-    height: 80px;
+    left: -15px;
+    bottom: 0;
+    height: 60px;
+    width: 100%;
 }
 
-#lstUsersNearby a {
-    padding-left: 90px;
-    padding-right: 33px;
+span.revenue-bar-label {
+    position: absolute;
+    left: 15px;
+    top: 7px;
 }
 
-#lstUsersNearby p.ui-li-aside {
-    width: 40%;
+span.events-bar-label {
+    position: absolute;
+    left: 15px;
+    bottom: 7px;
+}
+
+div.revenue-bar {
+    position: absolute;
+    height: 100%;
+    background-color: #a9a9a9;
+}
+
+div.events-bar {
+    position: absolute;
+    height: 50%;
+    bottom: 0;
+    background-color: #2489CE;
 }

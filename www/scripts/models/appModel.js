@@ -10,71 +10,35 @@ define(['jquery', 'underscore', 'Backbone.Force'], function ($, _, Force) {
 
     var appModel = {
 
-        // forcetk.Client instance
-        client:null,
+        // Salesforce opportunities
+        opportunities:null,
 
         initialize:function (forcetkClient) {
 
-            this.client = forcetkClient;
+            var that = this;
 
+            // Initializing Backbone.Force plugin
             Force.initialize(forcetkClient);
 
-            var OppsCollection = Force.Collection.extend({
-                    query:'SELECT Id, Name FROM Account'
-                }),
-                oppsCollection = new OppsCollection({});
+            // Creating opportunities collection
+            this.opportunities = new (Force.Collection.extend({
+                query:'SELECT Id, Name, ExpectedRevenue, CloseDate, Account.Name, (select DurationInMinutes from Events) ' +
+                    'FROM Opportunity ' +
+                    'WHERE IsClosed = false'
+            }));
 
-            oppsCollection.fetch({
-                success:function (result) {
-                    console.log('coll success');
+            // Fetching opportunities
+            this.opportunities.fetch({
+                success:function (collection, response) {
+                    that.trigger('initialized', that);
                 },
-                error:function (result) {
-                    console.log('coll error');
+                error:function (collection, response) {
+                    console.log('Error fetching opportunities: ' + response.statusText);
                 }
             });
-
-            var Opportunity = Force.Model.extend({type:'Opportunity'}),
-                newOpp = new Opportunity({
-                    Name:'My new opp',
-                    StageName:'Prospecting',
-                    CloseDate:new Date()
-                });
-//            newOpp.save(null, {
-//                success:function (result) {
-//                    console.log('create success');
-//                },
-//                error:function (result) {
-//                    console.log('fetch error');
-//                }
-//            });
-
-            var opp = new Opportunity({Id:'006E0000004sgp0'});
-            opp.fetch({
-                success:function (oppVal) {
-                    console.log('fetch success');
-
-                    oppVal.set('Amount', oppVal.get('Amount') + 1);
-
-                    oppVal.save(null, {
-                        success:function (result) {
-                            console.log('save success');
-                        },
-                        error:function (error) {
-                            console.log('save error');
-                        }
-                    });
-
-                },
-                error:function () {
-                    console.log('fetch error');
-                }
-            });
-
 
         }
-
     };
-
     _.extend(appModel, Backbone.Events);
 
     return appModel;

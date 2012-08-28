@@ -26,6 +26,7 @@ require.config({
         forcetk:'libs/forcetk/forcetk',
         // Extension Salesforce REST API library providing OAuth UI
         'forcetk.ui':'libs/forcetk/forcetk.ui',
+        // Backbone plugin for Salesforce
         'Backbone.Force':'libs/backbone/backbone.force'
     },
     shim:{

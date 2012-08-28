@@ -29,7 +29,10 @@
             // Setting options if were not set
             options || (options = {});
 
-            var client = Force.client;
+            var that = this,
+                client = Force.client,
+                error = options.error;
+
             // Extending options with Salesforce specific settings
             _.extend(options, {
                 cache:false,
@@ -44,19 +47,17 @@
                     }
                     xhr.setRequestHeader(client.authzHeader, "OAuth " + client.sessionId);
                     xhr.setRequestHeader('X-User-Agent', 'salesforce-toolkit-rest-javascript/' + client.apiVersion);
+                },
+                error:function (jqXHR, textStatus, errorThrown) {
+                    if (client.refreshToken && jqXHR.status === 401) {
+                        client.refreshAccessToken(function (oauthResponse) {
+                            client.setSessionToken(oauthResponse.access_token, null, oauthResponse.instance_url);
+                            that.sync.call(that, method, model, options);
+                        });
+                    } else if (error) {
+                        error(jqXHR, textStatus, errorThrown);
+                    }
                 }
-//    error: (!this.refreshToken || retry ) ? error : function(jqXHR, textStatus, errorThrown) {
-//        if (jqXHR.status === 401) {
-//            that.refreshAccessToken(function(oauthResponse) {
-//                    that.setSessionToken(oauthResponse.access_token, null,
-//                        oauthResponse.instance_url);
-//                    that.ajax(path, callback, error, method, payload, true);
-//                },
-//                error);
-//        } else {
-//            error(jqXHR, textStatus, errorThrown);
-//        }
-//    },
             });
 
             // In case of update it has to follow custom logic because Salesforce uses PATCH method and accepts only
