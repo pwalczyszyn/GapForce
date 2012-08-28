@@ -27,7 +27,9 @@ require.config({
         // Extension Salesforce REST API library providing OAuth UI
         'forcetk.ui':'libs/forcetk/forcetk.ui',
         // Backbone plugin for Salesforce
-        'Backbone.Force':'libs/backbone/backbone.force'
+        'Backbone.Force':'libs/backbone/backbone.force',
+        // mobile scrolling polyfill
+        overthrow:'libs/overthrow/overthrow'
     },
     shim:{
         Backbone:{
@@ -47,11 +49,14 @@ require.config({
         forcetk:{
             deps:['jquery'],
             exports:'forcetk'
+        },
+        overthrow:{
+            exports:'overthrow'
         }
     }
 });
 
-require(['domReady', 'views/MainView', 'models/appModel', 'jqm'],
+require(['domReady', 'views/MainView', 'jqm', 'overthrow'],
     function (domReady, MainView) {
 
         // domReady is RequireJS plugin that triggers when DOM is ready
