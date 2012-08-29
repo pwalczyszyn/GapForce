@@ -13,7 +13,7 @@
     ChildBrowserViewController* childBrowser;
 }
 
-@property (nonatomic, retain) ChildBrowserViewController *childBrowser;
+@property (nonatomic, strong) ChildBrowserViewController *childBrowser;
 
 
 - (void) showWebPage:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;

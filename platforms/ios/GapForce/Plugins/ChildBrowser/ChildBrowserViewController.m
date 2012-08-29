@@ -84,16 +84,6 @@
 
     webView.delegate = nil;
 
-    [webView release];
-    [closeBtn release];
-    [refreshBtn release];
-    [addressLabel release];
-    [backBtn release];
-    [fwdBtn release];
-    [safariBtn release];
-    [spinner release];
-    [ supportedOrientations release];
-    [super dealloc];
 }
 
 -(void)closeBrowser
@@ -168,7 +158,6 @@
         [url hasSuffix:@".bmp" ]  || 
         [url hasSuffix:@".gif" ]  )
     {
-        [ imageURL release ];
         imageURL = [url copy];
         isImage = YES;
         NSString* htmlText = @"<html><body style='background-color:#333;margin:0px;padding:0px;'><img style='min-height:200px;margin:0px;padding:0px;width:100%;height:auto;' alt='' src='IMGSRC'/></body></html>";

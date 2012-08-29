@@ -35,9 +35,9 @@
     id <ChildBrowserDelegate> delegate;
 }
 
-@property (nonatomic, retain)id <ChildBrowserDelegate> delegate;
-@property (nonatomic, retain) NSArray* supportedOrientations;
-@property(retain) NSString* imageURL;
+@property (nonatomic, strong)id <ChildBrowserDelegate> delegate;
+@property (nonatomic, strong) NSArray* supportedOrientations;
+@property(strong) NSString* imageURL;
 @property(assign) BOOL isImage;
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation) interfaceOrientation;
