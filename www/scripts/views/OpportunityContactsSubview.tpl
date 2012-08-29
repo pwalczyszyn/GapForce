@@ -1,1 +1,1 @@
-<ul id="lstOpportunities" data-role="listview" class="overthrow-content"/>
+<ul id="lstContacts" data-role="listview" class="overthrow-content" data-filter="true"/>

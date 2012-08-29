@@ -22,8 +22,8 @@ define(['jquery', 'underscore', 'Backbone.Force'], function ($, _, Force) {
 
             // Creating opportunities collection
             this.opportunities = new (Force.Collection.extend({
-                query:'SELECT Id, Name, ExpectedRevenue, CloseDate, Account.Name, StageName, Description, LeadSource' +
-                    ', (select DurationInMinutes from Events) FROM Opportunity WHERE IsClosed = false'
+                query:'SELECT Id, Name, ExpectedRevenue, CloseDate, Account.Id, Account.Name, StageName, Description' +
+                    ', LeadSource, (select DurationInMinutes from Events) FROM Opportunity WHERE IsClosed = false'
             }));
 
             // Fetching opportunities
