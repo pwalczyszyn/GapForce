@@ -21,5 +21,8 @@ define(['jquery'], function ($) {
         // 100ms for hoverDelay behaves better IMHO
         $.mobile.buttonMarkup.hoverDelay = 100;
 
+        // Setting default transition
+        $.mobile.defaultPageTransition = 'slide';
+
     });
 });
