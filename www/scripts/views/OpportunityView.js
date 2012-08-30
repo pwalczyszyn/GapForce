@@ -7,16 +7,17 @@
  */
 
 define(['jquery', 'underscore', './BaseView', './OpportunityInfoSubview', './OpportunityContactsSubview',
-        'text!./OpportunityView.tpl'],
-    function ($, _, BaseView, OpportunityInfoSubview, OpportunityContactsSubview, OpportunityTemplate) {
+        './OpportunityEventsSubview', 'text!./OpportunityView.tpl'],
+    function ($, _, BaseView, OpportunityInfoSubview, OpportunityContactsSubview, OpportunityEventsSubview,
+              OpportunityTemplate) {
 
         var OpportunityView = BaseView.extend({
 
             $content:null,
 
-            infoSubview:null,
+            subviews:null,
 
-            contactsSubview:null,
+            currentView:null,
 
             events:{
                 'click #btnBack':'btnBack_clickHandler',
@@ -24,54 +25,63 @@ define(['jquery', 'underscore', './BaseView', './OpportunityInfoSubview', './Opp
             },
 
             initialize:function (options) {
-                this.$el.html(OpportunityTemplate);
-                this.$content = this.$('div[data-role="content"]');
+                // Initilizing subviews array
+                this.subviews = [];
             },
 
             render:function () {
-                // Creating initial subview
-                this.infoSubview = new OpportunityInfoSubview({model:this.model}).render();
 
-                // Displaying initial subview
-                this.$content.html(this.infoSubview.el);
+                // Setting view
+                this.$el.html(OpportunityTemplate);
+
+                // View main content element
+                this.$content = this.$('div[data-role="content"]');
+
+                // Showing initial subview
+                this.showSubview('infoSubview', OpportunityInfoSubview);
 
                 return this;
             },
 
             navbarButton_clickHandler:function (event) {
+                switch (event.currentTarget.id) {
+                    case 'btnInfo':
 
-                if (event.currentTarget.id == 'btnInfo') {
+                        this.showSubview('infoSubview', OpportunityInfoSubview);
 
-                    // Detaching current view
-                    this.contactsSubview.$el.detach();
+                        break;
+                    case 'btnContacts':
 
-                    // Appending subview
-                    this.$content.append(this.infoSubview.el);
+                        this.showSubview('contactsSubview', OpportunityContactsSubview);
 
-                } else {
+                        break;
+                    case 'btnEvents':
 
-                    // Detaching current view
-                    this.infoSubview.$el.detach();
-
-                    if (!this.contactsSubview) {
-                        // Creating instance of contacts subview
-                        this.contactsSubview = new OpportunityContactsSubview({model:this.model});
-
-                        // Appending subview
-                        this.$content.append(this.contactsSubview.el);
-
-                        // Rendering a subview
-                        this.contactsSubview.render();
-
-                        // Triggering jQM create function to apply jQM magic
-                        this.$content.trigger('create');
-
-                    } else {
-                        // Appending subview
-                        this.$content.append(this.contactsSubview.el);
-                    }
+                        this.showSubview('eventsSubview', OpportunityEventsSubview);
+                        break;
                 }
             },
+
+            showSubview:function (subviewId, SubviewType) {
+                var subview = this.subviews[subviewId],
+                    wasInstantiated = true;
+
+                if (this.currentSubview) this.currentSubview.$el.detach();
+
+                if (!subview) {
+                    wasInstantiated = false;
+                    this.subviews[subviewId] = subview = new SubviewType({model:this.model});
+                }
+
+                this.currentSubview = subview;
+                this.$content.append(subview.el);
+
+                if (!wasInstantiated) {
+                    subview.render();
+                    this.$content.trigger('create');
+                }
+            },
+
 
             btnBack_clickHandler:function (event) {
                 $.mobile.jqmNavigator.popView();

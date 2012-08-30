@@ -11,6 +11,7 @@
     <div data-role="navbar">
         <ul>
             <li><a id="btnInfo" href="#" class="ui-btn-active">Info</a></li>
+            <li><a id="btnEvents" href="#">Events</a></li>
             <li><a id="btnContacts" href="#">Contacts</a></li>
         </ul>
     </div>

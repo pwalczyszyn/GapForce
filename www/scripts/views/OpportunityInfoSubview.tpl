@@ -10,13 +10,13 @@
 </p>
 
 <p>
-    <strong>Close Date:</strong> <%= CloseDate %>
+    <strong>Close Date:</strong> <%= CloseDate ? CloseDate : 'N/A' %>
 </p>
 
 <p>
-    <strong>Stage:</strong> <%= StageName %>
+    <strong>Stage:</strong> <%= StageName ? StageName : '' %>
 </p>
 
 <p>
-    <strong>Lead Source:</strong> <%= LeadSource %>
+    <strong>Lead Source:</strong> <%= LeadSource ? LeadSource : 'N/A' %>
 </p>
