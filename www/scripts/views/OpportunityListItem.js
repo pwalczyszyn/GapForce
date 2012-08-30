@@ -15,7 +15,7 @@ define(['jquery', 'underscore', 'Backbone', 'text!./OpportunityListItem.tpl'],
 
             initialize:function (options) {
                 this.maxRevOpportunity = options.maxRevOpportunity;
-                this.$el.jqmData('oppId', this.model.get('Id'));
+                this.$el.jqmData('model', this.model);
             },
 
             render:function () {

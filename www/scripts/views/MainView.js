@@ -85,8 +85,8 @@ define(['jquery', 'underscore', 'Backbone', 'forcetk.ui', './OpportunityView', '
             },
 
             li_clickHandler:function (event) {
-                var opp = this.appModel.opportunities.get($(event.currentTarget).jqmData('oppId'));
-                $.mobile.jqmNavigator.pushView(new OpportunityView({model:opp}));
+                var opportunity = $(event.currentTarget).jqmData('model');
+                $.mobile.jqmNavigator.pushView(new OpportunityView({model:opportunity}));
             },
 
             btnLogout_clickHandler:function (event) {
