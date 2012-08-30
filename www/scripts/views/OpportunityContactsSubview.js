@@ -59,8 +59,10 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'text!./Opportunit
                             }
 
                             // Adding contact item
-                            items.push($('<li data-icon="grid"><a href="tel:' + phone + '">' + firstName + ' '
+                            items.push($('<li data-icon="grid"><a href="#">' + firstName + ' '
                                 + lastName + ' (' + phone + ')</a></li>').jqmData('contact', contact)[0]);
+//                            items.push($('<li data-icon="grid"><a href="tel:' + phone + '">' + firstName + ' '
+//                                + lastName + ' (' + phone + ')</a></li>').jqmData('contact', contact)[0]);
                         });
 
                         // Appending contacts elements to the list, and refreshing a list to apply jQM magic
@@ -76,38 +78,61 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'text!./Opportunit
             },
 
             lstContacts_clickHandler:function (event) {
-                var contact = $(event.currentTarget).jqmData('contact'),
-                    callStartTime;
+                var that = this,
+                    contact = $(event.currentTarget).jqmData('contact');
 
-                // Listening for PhoneGap specific pause event, it is triggered when call is made
-                document.addEventListener("pause", function () {
-                    document.removeEventListener('pause', arguments.callee);
+//                // Listening for PhoneGap specific pause event, it is triggered when call is made
+//                document.addEventListener("pause", function () {
+//                    document.removeEventListener('pause', arguments.callee);
+//
+//                    var callStartTime = new Date;
+//
+//                    // Listening for PhoneGap specific resume event, it's triggered when user returns back to an app
+//                    document.addEventListener("resume", function () {
+//                        document.removeEventListener('resume', arguments.callee);
+//
+//                        // Calculating call duration in minutes
+//                        var callEndTime = new Date,
+//                            durationInMinutes = (callEndTime.getTime() - callStartTime.getTime()) / 60000;
+//
+//                        navigator.notification.confirm('Do you want to create new Call Event, with duration of '
+//                            + durationInMinutes + ' minutes?',
+//                            function (button) {
+//
+//                                if (button == 1) {
 
-                    callStartTime = new Date;
+                var callStartTime = new Date,
+                    callEndTime = new Date;
 
-                    // Listening for PhoneGap specific resume event, it's triggered when user returns back to an app
-                    document.addEventListener("resume", function () {
-                        document.removeEventListener('resume', arguments.callee);
+                // Defining an Event type that maps to SF Event
+                var Event = Force.Model.extend({
+                        type:'Event'
+                    }),
+                    newEvent = new Event({
+                        WhoId:contact.id,
+                        StartDateTime:callStartTime,
+                        EndDateTime:callEndTime,
+                        Subject:'Call'
+                    });
 
-                        // Calculating call duration in minutes
-                        var callEndTime = new Date,
-                            durationInMinutes = (callEndTime.getTime() - callStartTime.getTime()) / 60000;
+                newEvent.save(null, {
+                    success:function (model, response) {
 
-                        navigator.notification.confirm('Do you want to create new Call Event, with duration of '
-                            + durationInMinutes + ' minutes?',
-                            function (button) {
+                        console.log('New event saved!');
 
-                                if (button == 1) {
+                    },
+                    error:function (model, response) {
+                        console.log('Error saving event!');
+                    }
+                });
 
-//                                    var Event =
-
-                                }
-
-                            }, 'Create Salesforce Event?', "OK,Cancel");
-
-                    }, false);
-
-                }, false);
+//                                }
+//
+//                            }, 'Create Salesforce Event?', "OK,Cancel");
+//
+//                    }, false);
+//
+//                }, false);
             }
 
         });
