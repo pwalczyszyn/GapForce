@@ -16,20 +16,22 @@ require.config({
         underscore:'libs/underscore/underscore',
         // Backbone.js library
         Backbone:'libs/backbone/backbone',
+        // Backbone plugin for Salesforce
+        'Backbone.Force':'libs/backbone/backbone.force',
+        // Salesforce REST API library
+        forcetk:'libs/forcetk/forcetk',
+        // Extension Salesforce REST API library providing OAuth UI
+        'forcetk.ui':'libs/forcetk/forcetk.ui',
         // jQuery
         jquery:'libs/jquery/jquery-1.7.1',
         // jQuery Mobile framework
         jqm:'libs/jquery.mobile/jquery.mobile-1.1.1',
         // jQuery Mobile plugin for Backbone views navigation
         jqmNavigator:'libs/jquery.mobile/jqmNavigator',
-        // Salesforce REST API library
-        forcetk:'libs/forcetk/forcetk',
-        // Extension Salesforce REST API library providing OAuth UI
-        'forcetk.ui':'libs/forcetk/forcetk.ui',
-        // Backbone plugin for Salesforce
-        'Backbone.Force':'libs/backbone/backbone.force',
         // mobile scrolling polyfill
-        overthrow:'libs/overthrow/overthrow'
+        overthrow:'libs/overthrow/overthrow',
+        // JS Date Time lib
+        moment:'libs/moment/moment'
     },
     shim:{
         Backbone:{
@@ -38,10 +40,6 @@ require.config({
         },
         underscore:{
             exports:'_'
-        },
-        'Backbone.Force':{
-            deps:['jquery', 'underscore', 'Backbone'],
-            exports:'Backbone.Force'
         },
         jqm:{
             deps:['jquery', 'jqm-config'/* jQM specific config */, 'jqmNavigator']

@@ -71,7 +71,7 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'text!./Opportunit
                     },
                     error:function (collection, response) {
                         $.mobile.hidePageLoadingMsg();
-                        console.log('Error fetching contacts: ' + response.statusText);
+                        navigator.notification.alert('Error loading contacts: ' + response.statusText, null, 'Error!');
                     }
                 });
 
@@ -110,6 +110,7 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'text!./Opportunit
                     }),
                     newEvent = new Event({
                         WhoId:contact.id,
+                        WhatId:that.model.id,
                         StartDateTime:callStartTime,
                         EndDateTime:callEndTime,
                         Subject:'Call'
@@ -122,7 +123,7 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'text!./Opportunit
 
                     },
                     error:function (model, response) {
-                        console.log('Error saving event!');
+                        navigator.notification.alert('Error saving new event: ' + response.statusText, null, 'Error!');
                     }
                 });
 

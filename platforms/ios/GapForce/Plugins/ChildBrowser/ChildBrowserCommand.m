@@ -28,13 +28,13 @@
     childBrowser.supportedOrientations = cont.supportedOrientations;
     [ cont presentModalViewController:childBrowser animated:YES ];
 
-    NSString *url = (NSString*) [arguments objectAtIndex:0];
+    NSString *url = (NSString*) [arguments objectAtIndex:1];
 
     [childBrowser loadURL:url  ];
 
 }
 - (void) getPage:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options {
-    NSString *url = (NSString*) [arguments objectAtIndex:0];
+    NSString *url = (NSString*) [arguments objectAtIndex:1];
     [childBrowser loadURL:url  ];
 }
 
