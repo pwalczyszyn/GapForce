@@ -121,6 +121,16 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'text!./Opportunit
 
                         console.log('New event saved!');
 
+                        // Fetching to load rest of the event data
+                        model.fetch({
+                            success:function () {
+                                console.log('scuccess');
+                            },
+                            error:function (model, response) {
+                                console.log('refetching failed ' + reponse.statusText);
+                            }
+                        })
+
                     },
                     error:function (model, response) {
                         navigator.notification.alert('Error saving new event: ' + response.statusText, null, 'Error!');
