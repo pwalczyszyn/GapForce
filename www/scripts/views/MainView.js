@@ -6,82 +6,85 @@
  * Time: 11:36 AM
  */
 
-define(['jquery', 'underscore', 'Backbone', 'forcetk.ui', './OpportunityView', 'text!./MainView.tpl',
+define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'forcetk.ui', './OpportunityView', 'text!./MainView.tpl',
         './OpportunityListItem', 'require'],
-    function ($, _, Backbone, forcetk, OpportunityView, MainTemplate, OpportunityListItem, require) {
+    function ($, _, Backbone, Force, forcetk, OpportunityView, MainTemplate, OpportunityListItem, require) {
 
         var MainView = Backbone.View.extend({
 
-            appModel:null,
-
             opportunitiesListItems:null,
+
+            forcetkClient:null,
 
             events:{
                 'pageshow':'this_pageshowHandler',
-                'click li':'li_clickHandler'
+                'click li':'li_clickHandler',
+                'click #btnRefresh':'btnRefresh_clickHandler',
+                'click #btnLogout':'btnLogout_clickHandler'
             },
 
             initialize:function (options) {
-                var that = this;
-
-                // Rendering a view from a template
-                this.$el.html(MainTemplate);
+                // Forcetk client ref
+                this.ftkClientUI = options.ftkClientUI;
 
                 // Initiating opps list items array
                 this.opportunitiesListItems = [];
 
-                // Loading appModel dynamically allows destructing it with requrie.undef upon user logout.
-                require(['models/appModel'], function (appModel) {
+                // Creating opportunities collection
+                this.opportunities = new (Force.Collection.extend({
+                    query:'SELECT Id, Name, ExpectedRevenue, CloseDate, Account.Id, Account.Name, StageName, Description' +
+                        ', LeadSource, (select DurationInMinutes from Events) FROM Opportunity WHERE IsClosed = false'
+                }));
 
-                    // Registering handler for initialized event
-                    appModel.on('initialized', that.appModel_initializedHandler, that);
+            },
 
-                    // Salesforce login URL
-                    var loginURL = 'https://login.salesforce.com/',
-                    // Salesforce consumer key
-                        consumerKey = '3MVG9y6x0357HledFmmKitP_D1Kw1SW0YTpmK_.icZKxZebnHvLydZyWo9dsKWc_zYxeYzAF_RLG1pGtauqA6',
-                    // Salesforce callback URL
-                        callbackURL = 'https://login.salesforce.com/services/oauth2/success',
-                    // Instantiating forcetk ClientUI
-                        ftkClientUI = new forcetk.ClientUI(loginURL, consumerKey, callbackURL,
-                            function forceOAuthUI_successHandler(forcetkClient) { // successCallback
-                                appModel.initialize(forcetkClient);
-                            },
+            render:function () {
+                // Rendering a view from a template
+                this.$el.html(MainTemplate);
 
-                            function forceOAuthUI_errorHandler(error) { // errorCallback
-                                navigator.notification.alert('Login failed: ' + error.message, null, 'Error');
-                            }
-                        );
-
-                    // Initiating login process
-                    ftkClientUI.login();
-                });
+                return this;
             },
 
             this_pageshowHandler:function (event) {
-                if (!this.appModel) $.mobile.showPageLoadingMsg(null, 'Loading...');
+                // Loading opportunities
+                this.loadOpportunities();
             },
 
-            appModel_initializedHandler:function (appModel) {
-                // Setting appModel
-                this.appModel = appModel;
+            loadOpportunities:function () {
+                var that = this;
 
-                // Looking for an opportunity with highest revenue
-                var maxRevOpportunity = this.appModel.opportunities.max(function (opp) {
-                    return opp.get('ExpectedRevenue');
+                $.mobile.showPageLoadingMsg(null, 'Loading...');
+
+                // Clearing current items
+                this.opportunitiesListItems.length = 0;
+
+                // Fetching opportunities
+                this.opportunities.fetch({
+                    success:function (collection, response) {
+
+                        // Looking for an opportunity with highest revenue
+                        var maxRevOpportunity = collection.max(function (opp) {
+                            return opp.get('ExpectedRevenue');
+                        });
+
+                        // Iterating over opportunities and creating list items
+                        collection.each(function (opp) {
+                            var li = new OpportunityListItem({model:opp, maxRevOpportunity:maxRevOpportunity}).render();
+                            that.opportunitiesListItems.push(li);
+                        }, that);
+
+                        // Hiding page loading message
+                        $.mobile.hidePageLoadingMsg();
+
+                        // Adding list items
+                        this.$('#lstOpportunities').html(_.pluck(that.opportunitiesListItems, 'el')).listview("refresh");
+
+                    },
+                    error:function (collection, response) {
+                        navigator.notification.alert('Error fetching opportunities: ' + response.statusText, null, 'Error');
+                    }
                 });
 
-                // Iterating over opportunities and creating list items
-                this.appModel.opportunities.each(function (opp) {
-                    var li = new OpportunityListItem({model:opp, maxRevOpportunity:maxRevOpportunity}).render();
-                    this.opportunitiesListItems.push(li);
-                }, this);
-
-                // Hiding page loading message
-                $.mobile.hidePageLoadingMsg();
-
-                // Adding list items
-                this.$('#lstOpportunities').html(_.pluck(this.opportunitiesListItems, 'el')).listview("refresh");
             },
 
             li_clickHandler:function (event) {
@@ -89,9 +92,16 @@ define(['jquery', 'underscore', 'Backbone', 'forcetk.ui', './OpportunityView', '
                 $.mobile.jqmNavigator.pushView(new OpportunityView({model:opportunity}));
             },
 
+            btnRefresh_clickHandler:function (event) {
+                // Loading opportunities
+                this.loadOpportunities();
+            },
+
             btnLogout_clickHandler:function (event) {
-                require.undef('models/appModel');
-                $.mobile.jqmNavigator.replaceAll(new MainView());
+                $.mobile.showPageLoadingMsg(null, 'Logout...');
+                this.ftkClientUI.logout(function () {
+                    $.mobile.jqmNavigator.popView();
+                });
             }
 
         });

@@ -1,6 +1,7 @@
 <div data-role="header" class="absolute">
+    <a id="btnRefresh" href="#" data-icon="refresh" data-iconpos="notext">Refresh</a>
     <h1>GapForce</h1>
-    <a id="btnSettings" href="#" data-icon="gear" data-iconpos="notext" class="ui-btn-right">Settings</a>
+    <a id="btnLogout" href="#" class="ui-btn-right">Logout</a>
 </div>
 
 <div data-role="content" class="absolute overthrow">

@@ -54,8 +54,8 @@ require.config({
     }
 });
 
-require(['domReady', 'views/MainView', 'jqm', 'overthrow'],
-    function (domReady, MainView) {
+require(['domReady', 'views/LoginView', 'jqm', 'overthrow'],
+    function (domReady, LoginView) {
 
         // domReady is RequireJS plugin that triggers when DOM is ready
         domReady(function () {
@@ -65,8 +65,8 @@ require(['domReady', 'views/MainView', 'jqm', 'overthrow'],
                 if (desktop !== true)
                     cordova.exec(null, null, "SplashScreen", "hide", []);
 
-                // Pushing MainView
-                $.mobile.jqmNavigator.pushView(new MainView());
+                // Pushing LoginView
+                $.mobile.jqmNavigator.pushView(new LoginView());
             }
 
             if (navigator.userAgent.match(/(iPad|iPhone|Android)/)) {

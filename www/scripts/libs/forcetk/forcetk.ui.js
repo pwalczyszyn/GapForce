@@ -86,6 +86,45 @@
 
         },
 
+        logout:function logout(logoutCallback) {
+            var that = this,
+
+                refreshToken = encodeURIComponent(this.client.refreshToken),
+
+                doSecurLogout = function () {
+                    $.ajax({
+                        type:'GET',
+                        async:that.client.asyncAjax,
+                        url:that.client.instanceUrl + '/secur/logout.jsp',
+                        cache:false,
+                        processData:false,
+                        success:function (data, textStatus, jqXHR) {
+                            if (logoutCallback) logoutCallback.call();
+                        },
+                        error:function (jqXHR, textStatus, errorThrown) {
+                            console.log('logout error');
+                            if (logoutCallback) logoutCallback.call();
+                        }
+                    });
+                }
+
+            localStorage.setItem('ftkui_refresh_token', null);
+
+            $.ajax({
+                type:'POST',
+                url:that.client.instanceUrl + '/services/oauth2/revoke',
+                cache:false,
+                processData:false,
+                data:'token=' + refreshToken,
+                success:function (data, textStatus, jqXHR) {
+                    doSecurLogout();
+                },
+                error:function (jqXHR, textStatus, errorThrown) {
+                    doSecurLogout();
+                }
+            });
+        },
+
         _authenticate:function _authenticate() {
             var that = this;
 
@@ -164,6 +203,8 @@
             } else {
 
                 localStorage.setItem('ftkui_refresh_token', oauthResponse.refresh_token);
+
+                this.client.setRefreshToken(oauthResponse.refresh_token);
                 this.client.setSessionToken(oauthResponse.access_token, null, oauthResponse.instance_url);
 
                 if (this.successCallback)
@@ -173,7 +214,9 @@
 
             }
         }
-    };
+    }
+    ;
 
     return forcetk;
-}));
+}))
+;

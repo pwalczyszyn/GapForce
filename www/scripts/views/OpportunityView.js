@@ -6,11 +6,12 @@
  * Time: 2:02 PM
  */
 
-define(['jquery', 'underscore', './BaseView', './OpportunityInfoSubview', './OpportunityContactsSubview',
-    './OpportunityEventsSubview', 'text!./OpportunityView.tpl'],
-    function ($, _, BaseView, OpportunityInfoSubview, OpportunityContactsSubview, OpportunityEventsSubview, OpportunityTemplate) {
+define(['jquery', 'underscore', 'Backbone', './OpportunityInfoSubview', './OpportunityContactsSubview',
+        './OpportunityEventsSubview', 'text!./OpportunityView.tpl'],
+    function ($, _, Backbone, OpportunityInfoSubview, OpportunityContactsSubview, OpportunityEventsSubview,
+              OpportunityTemplate) {
 
-        var OpportunityView = BaseView.extend({
+        var OpportunityView = Backbone.View.extend({
 
             $content:null,
 
@@ -27,6 +28,9 @@ define(['jquery', 'underscore', './BaseView', './OpportunityInfoSubview', './Opp
             initialize:function (options) {
                 // Initilizing subviews array
                 this.subviews = [];
+
+                // Adding back button handler
+                document.addEventListener('backbutton', this.btnBack_clickHandler, false);
             },
 
             this_pagehideHandler:function (event) {
@@ -94,8 +98,11 @@ define(['jquery', 'underscore', './BaseView', './OpportunityInfoSubview', './Opp
                 return subview;
             },
 
-
             btnBack_clickHandler:function (event) {
+                // Removing back button event handler
+                document.removeEventListener('backbutton', this.btnBack_clickHandler);
+
+                // Popping active view
                 $.mobile.jqmNavigator.popView();
             }
 
