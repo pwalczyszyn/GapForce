@@ -37,6 +37,12 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'text!./Opportunit
                     query:'select Id, FirstName, LastName, Phone from Contact where AccountId = \''
                         + this.model.get('Account').Id + '\''
                 }));
+
+                // Sorting contacts
+                this.contacts.comparator = function (contact) {
+                    return contact.get('FirstName');
+                };
+
                 // Fetching opportunities
                 this.contacts.fetch({
                     success:function (collection, response) {
@@ -59,10 +65,11 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'text!./Opportunit
                             }
 
                             // Adding contact item
-                            items.push($('<li data-icon="grid"><a href="#">' + firstName + ' '
-                                + lastName + ' (' + phone + ')</a></li>').jqmData('contact', contact)[0]);
-//                            items.push($('<li data-icon="grid"><a href="tel:' + phone + '">' + firstName + ' '
+//                            items.push($('<li data-icon="grid"><a href="#">' + firstName + ' '
 //                                + lastName + ' (' + phone + ')</a></li>').jqmData('contact', contact)[0]);
+
+                            items.push($('<li data-icon="grid"><a href="tel:' + phone + '">' + firstName + ' '
+                                + lastName + ' (' + phone + ')</a></li>').jqmData('contact', contact)[0]);
                         });
 
                         // Appending contacts elements to the list, and refreshing a list to apply jQM magic
@@ -81,82 +88,82 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'text!./Opportunit
                 var that = this,
                     contact = $(event.currentTarget).jqmData('contact');
 
-//                // Listening for PhoneGap specific pause event, it is triggered when call is made
-//                document.addEventListener("pause", function () {
-//                    document.removeEventListener('pause', arguments.callee);
-//
-//                    var callStartTime = new Date;
-//
-//                    // Listening for PhoneGap specific resume event, it's triggered when user returns back to an app
-//                    document.addEventListener("resume", function () {
-//                        document.removeEventListener('resume', arguments.callee);
-//
-//                        // Calculating call duration in minutes
-//                        var callEndTime = new Date,
-//                            durationInMinutes = (callEndTime.getTime() - callStartTime.getTime()) / 60000;
-//
-//                        navigator.notification.confirm('Do you want to create new Call Event, with duration of '
-//                            + durationInMinutes + ' minutes?',
-//                            function (button) {
-//
-//                                if (button == 1) {
+                // Listening for PhoneGap specific pause event, it is triggered when call is made
+                document.addEventListener("pause", function () {
+                    document.removeEventListener('pause', arguments.callee);
 
-                var callStartTime = new Date,
-                    callEndTime = new Date;
+                    var callStartTime = new Date;
 
-                // Defining an Event type that maps to SF Event
-                var Event = Force.Model.extend({
-                        type:'Event'
-                    }),
-                    newEvent = new Event({
-                        WhoId:contact.id,
-                        WhatId:that.model.id,
-                        StartDateTime:callStartTime,
-                        EndDateTime:callEndTime,
-                        Subject:'Call'
-                    });
+                    // Listening for PhoneGap specific resume event, it's triggered when user returns back to an app
+                    document.addEventListener("resume", function () {
+                        document.removeEventListener('resume', arguments.callee);
 
-                newEvent.save(null, {
-                    success:function (model, response) {
+                        // Calculating call duration in minutes
+                        var callEndTime = new Date,
+                            durationInMinutes = (callEndTime.getTime() - callStartTime.getTime()) / 60000;
 
-                        console.log('New event saved!');
+                        navigator.notification.confirm('Do you want to create new Call Event, with duration of '
+                            + durationInMinutes + ' minutes?',
+                            function (button) {
 
-                        // Fetching to load rest of the event data
-                        model.fetch({
-                            success:function (model, response) {
-                                // Updating model Events attribute with new event
-                                var modelEvents = that.model.get('Events');
-                                if (!modelEvents) {
-                                    modelEvents = {records:[]};
-                                    // Setting addToUpdates to prevent this property from being synced with SF
-                                    that.model.set('Events', modelEvents, {addToUpdates:false});
+                                if (button == 1) {
+
+//                var callStartTime = new Date,
+//                    callEndTime = new Date;
+
+                                    // Defining an Event type that maps to SF Event
+                                    var Event = Force.Model.extend({
+                                            type:'Event'
+                                        }),
+                                        newEvent = new Event({
+                                            WhoId:contact.id,
+                                            WhatId:that.model.id,
+                                            StartDateTime:callStartTime,
+                                            EndDateTime:callEndTime,
+                                            Subject:'Call'
+                                        });
+
+                                    newEvent.save(null, {
+                                        success:function (model, response) {
+
+                                            console.log('New event saved!');
+
+                                            // Fetching to load rest of the event data
+                                            model.fetch({
+                                                success:function (model, response) {
+                                                    // Updating model Events attribute with new event
+                                                    var modelEvents = that.model.get('Events');
+                                                    if (!modelEvents) {
+                                                        modelEvents = {records:[]};
+                                                        // Setting addToUpdates to prevent this property from being synced with SF
+                                                        that.model.set('Events', modelEvents, {addToUpdates:false});
+                                                    }
+                                                    modelEvents.records.push({DurationInMinutes:model.get('DurationInMinutes')});
+
+                                                    // Triggering Events attribute change event
+                                                    that.model.trigger('change:Events');
+
+                                                    // Triggering newEventAdded event for OpportunityEventsSubview to refresh
+                                                    that.model.trigger('newEventAdded', model);
+                                                },
+                                                error:function (model, response) {
+                                                    console.log('refetching failed ' + reponse.statusText);
+                                                }
+                                            })
+
+                                        },
+                                        error:function (model, response) {
+                                            navigator.notification.alert('Error saving new event: ' + response.statusText, null, 'Error!');
+                                        }
+                                    });
+
                                 }
-                                modelEvents.records.push({DurationInMinutes:model.get('DurationInMinutes')});
 
-                                // Triggering Events attribute change event
-                                that.model.trigger('change:Events');
+                            }, 'Create Salesforce Event?', "OK,Cancel");
 
-                                // Triggering newEventAdded event for OpportunityEventsSubview to refresh
-                                that.model.trigger('newEventAdded', model);
-                            },
-                            error:function (model, response) {
-                                console.log('refetching failed ' + reponse.statusText);
-                            }
-                        })
+                    }, false);
 
-                    },
-                    error:function (model, response) {
-                        navigator.notification.alert('Error saving new event: ' + response.statusText, null, 'Error!');
-                    }
-                });
-
-//                                }
-//
-//                            }, 'Create Salesforce Event?', "OK,Cancel");
-//
-//                    }, false);
-//
-//                }, false);
+                }, false);
             }
 
         });
