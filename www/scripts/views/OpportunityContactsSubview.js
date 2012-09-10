@@ -123,8 +123,21 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'text!./Opportunit
 
                         // Fetching to load rest of the event data
                         model.fetch({
-                            success:function () {
-                                console.log('scuccess');
+                            success:function (model, response) {
+                                // Updating model Events attribute with new event
+                                var modelEvents = that.model.get('Events');
+                                if (!modelEvents) {
+                                    modelEvents = {records:[]};
+                                    // Setting addToUpdates to prevent this property from being synced with SF
+                                    that.model.set('Events', modelEvents, {addToUpdates:false});
+                                }
+                                modelEvents.records.push({DurationInMinutes:model.get('DurationInMinutes')});
+
+                                // Triggering Events attribute change event
+                                that.model.trigger('change:Events');
+
+                                // Triggering newEventAdded event for OpportunityEventsSubview to refresh
+                                that.model.trigger('newEventAdded', model);
                             },
                             error:function (model, response) {
                                 console.log('refetching failed ' + reponse.statusText);

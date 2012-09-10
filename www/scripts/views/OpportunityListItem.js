@@ -15,7 +15,23 @@ define(['jquery', 'underscore', 'Backbone', 'text!./OpportunityListItem.tpl'],
 
             initialize:function (options) {
                 this.maxRevOpportunity = options.maxRevOpportunity;
+
+                // Binding model object with list item element
                 this.$el.jqmData('model', this.model);
+
+                // Registering change:Events event handler
+                this.model.on('change:Events', this.events_changeHadler, this);
+            },
+
+            remove:function () {
+
+                // Removing change:Events event handler
+                this.model.off('change:Events', this.events_changeHadler);
+
+                // Calling Backbone's original remove function
+                Backbone.View.prototype.remove.call(this);
+
+                return this;
             },
 
             render:function () {
@@ -28,9 +44,15 @@ define(['jquery', 'underscore', 'Backbone', 'text!./OpportunityListItem.tpl'],
                     return mem + (event.DurationInMinutes / 60);
                 }, 0) : 0;
 
+                // Rendering list item element content based on a template
                 this.$el.html(_.template(OpportunityListItemTemplate, tplData));
 
                 return this;
+            },
+
+            events_changeHadler:function (event) {
+                // Rerendering list item
+                this.render();
             }
 
         });

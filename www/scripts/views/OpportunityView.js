@@ -7,9 +7,8 @@
  */
 
 define(['jquery', 'underscore', './BaseView', './OpportunityInfoSubview', './OpportunityContactsSubview',
-        './OpportunityEventsSubview', 'text!./OpportunityView.tpl'],
-    function ($, _, BaseView, OpportunityInfoSubview, OpportunityContactsSubview, OpportunityEventsSubview,
-              OpportunityTemplate) {
+    './OpportunityEventsSubview', 'text!./OpportunityView.tpl'],
+    function ($, _, BaseView, OpportunityInfoSubview, OpportunityContactsSubview, OpportunityEventsSubview, OpportunityTemplate) {
 
         var OpportunityView = BaseView.extend({
 
@@ -20,6 +19,7 @@ define(['jquery', 'underscore', './BaseView', './OpportunityInfoSubview', './Opp
             currentView:null,
 
             events:{
+                'pagehide':'this_pagehideHandler',
                 'click #btnBack':'btnBack_clickHandler',
                 'click div[data-role="navbar"] a':'navbarButton_clickHandler'
             },
@@ -27,6 +27,12 @@ define(['jquery', 'underscore', './BaseView', './OpportunityInfoSubview', './Opp
             initialize:function (options) {
                 // Initilizing subviews array
                 this.subviews = [];
+            },
+
+            this_pagehideHandler:function (event) {
+                // EventsSubview listens on model events that is why it needs cleanup
+                var eventsSubview = this.subviews['eventsSubview'];
+                if (eventsSubview) eventsSubview.remove();
             },
 
             render:function () {
@@ -57,7 +63,11 @@ define(['jquery', 'underscore', './BaseView', './OpportunityInfoSubview', './Opp
                         break;
                     case 'btnEvents':
 
-                        this.showSubview('eventsSubview', OpportunityEventsSubview);
+                        var eventsSubview = this.showSubview('eventsSubview', OpportunityEventsSubview);
+
+                        // Refreshing jQM list, refresh can be called only when view is in the DOM
+                        eventsSubview.$('#lstEvents').listview('refresh');
+
                         break;
                 }
             },
@@ -80,6 +90,8 @@ define(['jquery', 'underscore', './BaseView', './OpportunityInfoSubview', './Opp
                     subview.render();
                     this.$content.trigger('create');
                 }
+
+                return subview;
             },
 
 
