@@ -37,6 +37,7 @@
 		CCBA14C515EEAD2C00B4771B /* ChildBrowserCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = CCBA14C015EEAD2C00B4771B /* ChildBrowserCommand.m */; };
 		CCBA14C615EEAD2C00B4771B /* ChildBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CCBA14C215EEAD2C00B4771B /* ChildBrowserViewController.m */; };
 		CCBA14C715EEAD2C00B4771B /* ChildBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CCBA14C315EEAD2C00B4771B /* ChildBrowserViewController.xib */; };
+		CCC76A0916009D2F00D0D2E6 /* icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CCC76A0816009D2F00D0D2E6 /* icon-72@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +96,7 @@
 		CCBA14C115EEAD2C00B4771B /* ChildBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChildBrowserViewController.h; sourceTree = "<group>"; };
 		CCBA14C215EEAD2C00B4771B /* ChildBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChildBrowserViewController.m; sourceTree = "<group>"; };
 		CCBA14C315EEAD2C00B4771B /* ChildBrowserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ChildBrowserViewController.xib; sourceTree = "<group>"; };
+		CCC76A0816009D2F00D0D2E6 /* icon-72@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-72@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -224,6 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				308D052E1370CCF300D202BF /* icon-72.png */,
+				CCC76A0816009D2F00D0D2E6 /* icon-72@2x.png */,
 				308D052F1370CCF300D202BF /* icon.png */,
 				308D05301370CCF300D202BF /* icon@2x.png */,
 			);
@@ -336,6 +339,7 @@
 				CCBA149515EE955600B4771B /* www in Resources */,
 				CCBA14C415EEAD2C00B4771B /* ChildBrowser.bundle in Resources */,
 				CCBA14C715EEAD2C00B4771B /* ChildBrowserViewController.xib in Resources */,
+				CCC76A0916009D2F00D0D2E6 /* icon-72@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,7 +400,7 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "GapForce/GapForce-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				PRODUCT_NAME = GapForce;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -414,7 +418,7 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "GapForce/GapForce-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				PRODUCT_NAME = GapForce;
 				TARGETED_DEVICE_FAMILY = 1;
 			};

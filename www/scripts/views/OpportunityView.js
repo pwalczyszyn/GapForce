@@ -30,7 +30,7 @@ define(['jquery', 'underscore', 'Backbone', './OpportunityInfoSubview', './Oppor
                 this.subviews = [];
 
                 // Adding back button handler
-                document.addEventListener('backbutton', this.btnBack_clickHandler, false);
+//                document.addEventListener('backbutton', this.btnBack_clickHandler, false);
             },
 
             this_pagehideHandler:function (event) {
@@ -100,7 +100,7 @@ define(['jquery', 'underscore', 'Backbone', './OpportunityInfoSubview', './Oppor
 
             btnBack_clickHandler:function (event) {
                 // Removing back button event handler
-                document.removeEventListener('backbutton', this.btnBack_clickHandler);
+//                document.removeEventListener('backbutton', arguments.callee, false);
 
                 // Popping active view
                 $.mobile.jqmNavigator.popView();

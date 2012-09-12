@@ -61,13 +61,13 @@
         login:function login() {
 
             var refreshToken = localStorage.getItem('ftkui_refresh_token');
-
+            
             if (refreshToken) {
                 var that = this;
-                this.client.setRefreshToken(encodeURIComponent(refreshToken));
+                this.client.setRefreshToken(refreshToken);
                 this.client.refreshAccessToken(
                     function refreshAccessToken_successHandler(sessionToken) {
-
+                    	
                         if (that.successCallback) {
                             that.client.setSessionToken(sessionToken.access_token, null, sessionToken.instance_url);
                             that.successCallback.call(that, that.client);
@@ -160,15 +160,16 @@
 
             } else if (window.plugins && window.plugins.childBrowser) { // This is PhoneGap/Cordova app
 
-
                 var childBrowser = window.plugins.childBrowser;
                 childBrowser.onLocationChange = function (loc) {
                     if (loc.indexOf(that.callbackURL) == 0) {
                         childBrowser.close();
-                        that._sessionCallback(decodeURIComponent(loc));
+                        loc = decodeURI(loc).replace('%23', '#');
+                        that._sessionCallback(loc);
                     }
                 };
-                childBrowser.showWebPage(this._getAuthorizeUrl());
+
+                childBrowser.showWebPage(this._getAuthorizeUrl(), {showLocationBar:true, locationBarAlign:'bottom'});
 
             } else {
                 throw new Error('Didn\'t find way to authenticate!');
@@ -176,12 +177,12 @@
         },
 
         _getAuthorizeUrl:function _getAuthorizeUrl() {
-            return this.loginURL + 'services/oauth2/authorize?display=touch'
+            return this.loginURL + 'services/oauth2/authorize?'
                 + '&response_type=token&client_id=' + encodeURIComponent(this.consumerKey)
                 + '&redirect_uri=' + encodeURIComponent(this.callbackURL);
         },
 
-        _sessionCallback:function sessionCallback(loc) {
+        _sessionCallback:function _sessionCallback(loc) {
             var oauthResponse = {},
                 fragment = loc.split("#")[1];
 

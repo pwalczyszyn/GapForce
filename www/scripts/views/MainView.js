@@ -45,9 +45,15 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'forcetk.ui', './O
                 return this;
             },
 
+            firstShow:true,
+
             this_pageshowHandler:function (event) {
-                // Loading opportunities
-                this.loadOpportunities();
+                if (this.firstShow) {
+                    // Loading opportunities
+                    this.loadOpportunities();
+
+                    this.firstShow = false;
+                }
             },
 
             loadOpportunities:function () {

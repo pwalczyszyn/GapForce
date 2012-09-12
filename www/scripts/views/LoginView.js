@@ -13,20 +13,25 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'forcetk.ui', './L
         var LoginView = Backbone.View.extend({
 
             events:{
+                'pageshow':'this_pageshowHandler',
                 'click #btnLogin':'btnLogin_clickHandler',
                 'click #btnLoginConfig':'btnLoginConfig_clickHandler'
             },
 
-            initialize:function (options) {
-            },
-
             render:function () {
                 this.$el.html(LoginTemplate);
-
-                if (localStorage.getItem('ftkui_refresh_token'))
-                    this.login();
-
                 return this;
+            },
+
+            firstShow:true,
+
+            this_pageshowHandler:function (event) {
+                if (this.firstShow) {
+                    if (localStorage.getItem('ftkui_refresh_token'))
+                        this.login();
+
+                    this.firstShow = false;
+                }
             },
 
             btnLogin_clickHandler:function () {
@@ -34,6 +39,8 @@ define(['jquery', 'underscore', 'Backbone', 'Backbone.Force', 'forcetk.ui', './L
             },
 
             login:function () {
+
+                $.mobile.showPageLoadingMsg(null, 'Authenticating...');
 
                 var loginConfig = localStorage.getItem('gf_login_config'),
                 // Salesforce login URL
